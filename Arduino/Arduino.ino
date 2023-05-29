@@ -49,9 +49,9 @@ ServoTimer2 servo;
 #define SERVO_CENTER 1507
 // Positive delta = LEFT
 #define SERVO_MAX_DELTA 300
-#define SERVO_STEP 50
+#define SERVO_STEP 60
 // Scanning info
-#define SCAN_INTERVAL 40
+#define SCAN_INTERVAL 75
 long lastScan = 0;
 #define LEFT -1
 #define RIGHT 1
@@ -178,13 +178,14 @@ void dodgeObstacles() {
   int dir = leftAverage > rightAverage ? -1 : 1;
   
   // If we are already turning, prefer turning in the same direction
-  if (abs(x) > .15 && abs(leftAverage - rightAverage) < 15) dir = x > 0 ? 1 : -1;
+  if (abs(x) > .2 && abs(leftAverage - rightAverage) < 20) dir = x > 0 ? 1 : -1;
   
   // Turn harder the closer we are to the obstacle
-  double xLeft;
-  if (dir == 1) xLeft = 1.0 - x;
-  else xLeft = -1.0 - x;
-  finalX = x + xLeft * (70.0 - frontalDistance) / 70.0;
+  // Also, scale turn speed with car speed
+  double xRem; // remaining x in chosen direction
+  if (dir == 1) xRem = (1.0 - x) * abs(y) * 0.8;
+  else xRem = (-1.0 - x) * abs(y) * 0.8;
+  finalX = x + xRem * (60.0 - frontalDistance) / 60.0;
 }
 
 /**

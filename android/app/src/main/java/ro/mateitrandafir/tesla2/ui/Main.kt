@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Log
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -266,9 +267,10 @@ fun Main(snackbar: SnackbarHostState) {
                 listOf(Color.Green, Color.Yellow, Color.Red), endY = with(LocalDensity.current) { 80.dp.toPx() }
             )
             for (distance in distances) {
+                val height by animateIntAsState(targetValue = (70 - distance).coerceIn(15..65), label = "DistanceSensor Box")
                 Box(modifier = Modifier
                     .weight(1f)
-                    .height((120 - distance).coerceIn(15..120).dp)
+                    .height((height * 1.5f).dp)
                     .background(brush))
             }
         }
