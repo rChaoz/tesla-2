@@ -156,6 +156,7 @@ fun Main(snackbar: SnackbarHostState) {
     var rightOffset by remember { mutableStateOf(Offset(0f, 0f)) }
     var sweeping by remember { mutableStateOf(false) }
     var dodgeMode by remember { mutableStateOf(false) }
+    var soundEnabled by remember { mutableStateOf(true) }
 
     // Write joystick data every .1s
     LaunchedEffect(socket) {
@@ -164,7 +165,7 @@ fun Main(snackbar: SnackbarHostState) {
             val writer = socket?.outputStream?.writer() ?: return@withContext
             while (true) try {
                 val total = leftOffset + rightOffset
-                writer.append("${total.x},${total.y},${if (sweeping) 1 else 0},${if (dodgeMode) 1 else 0}")
+                writer.append("${total.x},${total.y},${if (sweeping) 1 else 0},${if (dodgeMode) 1 else 0},${if (soundEnabled) 1 else 0}")
                 writer.append("\r\n")
                 writer.flush()
                 delay(100.milliseconds)
@@ -191,28 +192,41 @@ fun Main(snackbar: SnackbarHostState) {
                 .align(Alignment.BottomEnd)
         )
 
-        FilledIconToggleButton(
-            checked = swap, onCheckedChange = { swap = it }, modifier = Modifier
+        Row(
+            modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(20.dp)
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Icon(painter = painterResource(R.drawable.baseline_swap_horiz_24), contentDescription = "Swap controls")
+            FilledIconToggleButton(checked = swap, onCheckedChange = { swap = it }) {
+                Icon(painter = painterResource(R.drawable.baseline_swap_horiz_24), contentDescription = "Swap controls")
+            }
+            FilledIconToggleButton(checked = soundEnabled, onCheckedChange = { soundEnabled = it }) {
+                Icon(
+                    painter = painterResource(if (soundEnabled) R.drawable.baseline_volume_24 else R.drawable.baseline_volume_off_24),
+                    contentDescription = "Mute sound"
+                )
+            }
         }
 
-        Button(onClick = { sweeping = !sweeping }, colors = ButtonDefaults.buttonColors(
+        Button(onClick = { sweeping = !sweeping; if (!sweeping) dodgeMode = false }, colors = ButtonDefaults.buttonColors(
             containerColor = if (sweeping) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             contentColor = if (sweeping) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-        ), modifier = Modifier.align(Alignment.TopStart).padding(20.dp)) {
+        ), modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Icon(painter = painterResource(R.drawable.baseline_radar_24), contentDescription = null)
                 Text(text = "Sweeping mode")
             }
         }
 
-        Button(onClick = { dodgeMode = !dodgeMode }, colors = ButtonDefaults.buttonColors(
+        Button(onClick = { dodgeMode = !dodgeMode }, enabled = sweeping, colors = ButtonDefaults.buttonColors(
             containerColor = if (dodgeMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             contentColor = if (dodgeMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-        ), modifier = Modifier.align(Alignment.TopEnd).padding(20.dp)) {
+        ), modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Icon(painter = painterResource(R.drawable.baseline_car_24), contentDescription = null)
                 Text(text = "Mode: ${if (dodgeMode) "obstacle avoidance" else "speed limiter"}")
