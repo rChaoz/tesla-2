@@ -1,7 +1,5 @@
 package ro.mateitrandafir.tesla2.ui.components
 
-import android.util.Log
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -18,11 +16,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import ro.mateitrandafir.tesla2.R
-import ro.mateitrandafir.tesla2.TAG
 import kotlin.math.sqrt
 
 @Composable

@@ -9,12 +9,16 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +54,6 @@ import ro.mateitrandafir.tesla2.ui.components.Joystick
 import ro.mateitrandafir.tesla2.ui.components.LoadingOverlay
 import java.io.IOException
 import java.util.UUID
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -136,10 +139,10 @@ fun Main(snackbar: SnackbarHostState) {
             val reader = socket?.inputStream?.reader() ?: return@withContext
             while (true) try {
                 reader.forEachLine {
-                    Log.d(TAG, "Incoming Data: $it")
+                    //Log.e(TAG, "Incoming Data: $it")
                 }
             } catch (e: IOException) {
-                Log.d(TAG, "SocketError", e)
+                Log.e(TAG, "SocketError", e)
                 if (socket?.isConnected == false) {
                     socket = null
                     break
@@ -148,16 +151,20 @@ fun Main(snackbar: SnackbarHostState) {
         }
     }
 
-    // Write joystick data every .1s
+    // Controllable values
     var leftOffset by remember { mutableStateOf(Offset(0f, 0f)) }
     var rightOffset by remember { mutableStateOf(Offset(0f, 0f)) }
+    var sweeping by remember { mutableStateOf(false) }
+    var dodgeMode by remember { mutableStateOf(false) }
+
+    // Write joystick data every .1s
     LaunchedEffect(socket) {
         if (socket == null) return@LaunchedEffect
         withContext(Dispatchers.IO) {
             val writer = socket?.outputStream?.writer() ?: return@withContext
             while (true) try {
                 val total = leftOffset + rightOffset
-                writer.append("${total.x},${total.y}")
+                writer.append("${total.x},${total.y},${if (sweeping) 1 else 0},${if (dodgeMode) 1 else 0}")
                 writer.append("\r\n")
                 writer.flush()
                 delay(100.milliseconds)
@@ -183,12 +190,33 @@ fun Main(snackbar: SnackbarHostState) {
                 .padding(40.dp)
                 .align(Alignment.BottomEnd)
         )
+
         FilledIconToggleButton(
             checked = swap, onCheckedChange = { swap = it }, modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(10.dp)
+                .padding(20.dp)
         ) {
             Icon(painter = painterResource(R.drawable.baseline_swap_horiz_24), contentDescription = "Swap controls")
+        }
+
+        Button(onClick = { sweeping = !sweeping }, colors = ButtonDefaults.buttonColors(
+            containerColor = if (sweeping) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (sweeping) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+        ), modifier = Modifier.align(Alignment.TopStart).padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Icon(painter = painterResource(R.drawable.baseline_radar_24), contentDescription = null)
+                Text(text = "Sweeping mode")
+            }
+        }
+
+        Button(onClick = { dodgeMode = !dodgeMode }, colors = ButtonDefaults.buttonColors(
+            containerColor = if (dodgeMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (dodgeMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+        ), modifier = Modifier.align(Alignment.TopEnd).padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Icon(painter = painterResource(R.drawable.baseline_car_24), contentDescription = null)
+                Text(text = "Mode: ${if (dodgeMode) "obstacle avoidance" else "speed limiter"}")
+            }
         }
     }
 }
