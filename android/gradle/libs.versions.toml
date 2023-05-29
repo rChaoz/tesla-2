@@ -8,10 +8,7 @@ espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.2"
 compose-bom = "2023.05.01"
-bluetooth-serial = "v1.1.2"
-rxjava-java = "2.2.21"
-rxjava-android = "2.1.1"
-permissions = "0.31.3"
+permissions = "0.31.3-beta"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -28,9 +25,6 @@ ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
-bluetooth-serial = { group = "com.github.harry1453", name = "android-bluetooth-serial", version.ref = "bluetooth-serial" }
-rxjava-java = { group = "io.reactivex.rxjava2", name = "rxjava", version.ref = "rxjava-java" }
-rxjava-android = { group = "io.reactivex.rxjava2", name = "rxandroid", version.ref = "rxjava-android" }
 permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "permissions" }
 
 [plugins]
